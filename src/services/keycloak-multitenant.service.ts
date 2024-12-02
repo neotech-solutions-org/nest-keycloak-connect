@@ -50,21 +50,10 @@ export class KeycloakMultiTenantService {
     const secret = await this.resolveSecret(realm, request);
 
     // Check if existing
-    if (this.instances.has(realm)) {
-      // If resolve always is enabled, resolve everything again
-      if (this.keycloakOpts.multiTenant.resolveAlways) {
-        const keycloak: any = this.instances.get(realm);
-
-        keycloak.config.authServerUrl = authServerUrl;
-        keycloak.config.secret = secret;
-        keycloak.grantManager.secret = secret;
-
-        // Save instance
-        this.instances.set(realm, keycloak);
-
-        return keycloak;
-      }
-      // Otherwise return the instance
+    if (
+      this.instances.has(realm) &&
+      !this.keycloakOpts.multiTenant.resolveAlways
+    ) {
       return this.instances.get(realm);
     } else {
       // TODO: Repeating code from  provider, will need to rework this in 2.0
